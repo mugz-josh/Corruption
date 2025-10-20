@@ -9,17 +9,17 @@ const HomePage = () => {
       <div className="hero">
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title">Report Corruption.<br/>Drive Change.</h1>
+            <h1 className="hero-title">Report corruption cases and public issues</h1>
             <p className="hero-subtitle">
-              iReporter empowers citizens to report corruption and call for government intervention
-              on issues affecting their communities.
+              The all-weeb-on-line-how bible your government:
+              entire.egf from every thing.intervainment.
             </p>
             <div className="hero-actions">
-              <Link to="/register" className="btn btn-primary btn-lg">
-                Get Started
+              <Link to="/create-report" className="btn btn-primary btn-lg">
+                Report a Case
               </Link>
-              <Link to="/login" className="btn btn-outline btn-lg">
-                Sign In
+              <Link to="/about" className="btn btn-outline btn-lg">
+                Learn More
               </Link>
             </div>
           </div>

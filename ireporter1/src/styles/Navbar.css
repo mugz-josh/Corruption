@@ -24,6 +24,25 @@
   align-items: center;
   gap: 0.75rem; /* Refined spacing between icon and text */
   letter-spacing: 0.5px; /* Slight letter spacing for a premium look */
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: var(--border-radius);
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover .brand-logo {
+  transform: scale(1.05);
 }
 
 .brand-icon {
@@ -42,6 +61,7 @@
   padding: 0.5rem 1rem;
   border-radius: var(--border-radius);
   transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .nav-link:hover {
@@ -64,6 +84,50 @@
   letter-spacing: 0.3px;
 }
 
+/* Button Styles */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--text-white);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary);
+  color: var(--text-white);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 0.4rem 1rem;
+  font-size: var(--font-size-xs);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar-content {
@@ -76,6 +140,8 @@
   .navbar-links {
     gap: 0.75rem;
     flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .nav-link {
@@ -83,7 +149,46 @@
     font-size: var(--font-size-sm);
   }
 
+  .user-menu {
+    border-left: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .user-name {
     display: none;
+  }
+
+  .brand-logo {
+    width: 35px;
+    height: 35px;
+  }
+
+  .navbar-brand {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: var(--spacing-sm) 1rem;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    width: 100%;
+    text-align: left;
+  }
+
+  .btn {
+    width: 100%;
+    margin-top: 0.5rem;
   }
 }
