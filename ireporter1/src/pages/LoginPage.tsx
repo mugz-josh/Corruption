@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/ui/Navbar';
+
+
 import '../styles/AuthPage.css';
 
 const LoginPage = () => {
