@@ -1,22 +1,13 @@
 export type ReportType = 'red-flag' | 'intervention';
-
 export type ReportStatus = 'draft' | 'under-investigation' | 'resolved' | 'rejected';
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  phone?: string;
-  isAdmin: boolean;
-}
 
 export interface Report {
   id: string;
-  userId: string;
+  userId: string; // usually the email of the creator
   type: ReportType;
   title: string;
   description: string;
-  location: string;
+  location?: string;
   latitude?: number;
   longitude?: number;
   status: ReportStatus;
@@ -26,10 +17,17 @@ export interface Report {
   updatedAt: string;
 }
 
+export interface User {
+  email: string;
+  name: string;
+  phone?: string;
+  isAdmin?: boolean;
+}
+
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
-  logout: () => void;
   isLoading: boolean;
+  login: (email: string, password: string) => Promise<User>;
+  register: (email: string, password: string, name: string, phone?: string) => Promise<User>;
+  logout: () => void;
 }

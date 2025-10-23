@@ -1,30 +1,24 @@
-import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-
-import Navbar from '../components/ui/Navbar';
+import { useEffect, useState, useMemo } from 'react';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-
-
+import ReportCard from '../components/ui/ReportCard';
 import type { Report, ReportStatus } from '../types';
-import { getReports, updateReport } from '../utilis/storage';
-
-
+import { getReports, updateReport, getUsers } from '../utilis/storage';
 import { sendStatusChangeSMS } from '../utilis/smsNotification';
-import { getUsers } from '../utilis/storage';
-
-
-
 import { toast } from '../hooks/use-toast';
-
-
 import '../styles/AdminPage.css';
+
+// Helper to format status
+const formatStatusForDisplay = (status: ReportStatus | 'all') => {
+  if (status === 'all') return 'All Records';
+  return status.replace(/-/g, ' ').toUpperCase();
+};
 
 const AdminPage = () => {
   const { user } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
-  const [filterType, setFilterType] = useState<'all' | 'red-flag' | 'intervention'>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | ReportStatus>('all');
+  const [contentView, setContentView] = useState<'all' | ReportStatus>('all'); // status filter
+  const [activeType, setActiveType] = useState<'all' | 'red-flag' | 'intervention'>('all'); // type filter
 
   useEffect(() => {
     loadReports();
@@ -32,44 +26,36 @@ const AdminPage = () => {
 
   const loadReports = () => {
     const allReports = getReports();
-    setReports(allReports.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    ));
+    setReports(
+      allReports.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+    );
   };
 
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
+  // --- Authorization ---
+  if (!user) return <Navigate to="/login" />;
+  if (!user.isAdmin) return <Navigate to="/dashboard" />;
 
-  if (!user.isAdmin) {
-    return <Navigate to="/dashboard" />;
-  }
-
+  // --- Status Change Handler ---
   const handleStatusChange = async (reportId: string, newStatus: ReportStatus) => {
-    const report = reports.find(r => r.id === reportId);
+    const report = reports.find((r) => r.id === reportId);
     if (!report) return;
 
-    // Update report status
     updateReport(reportId, { status: newStatus });
     loadReports();
 
-    // Send SMS notification to user
     const users = getUsers();
-    const reportOwner = users.find(u => u.id === report.userId);
-    
+    const reportOwner = users.find((u) => u.email === report.userId);
+
     if (reportOwner?.phone) {
       try {
-        await sendStatusChangeSMS(
-          reportOwner.phone,
-          reportId,
-          newStatus,
-          report.title
-        );
+        await sendStatusChangeSMS(reportOwner.phone, reportId, newStatus, report.title);
         toast({
           title: 'Status Updated',
           description: `SMS notification sent to user at ${reportOwner.phone}`,
         });
-      } catch (error) {
+      } catch {
         toast({
           title: 'Status Updated',
           description: 'Status changed but SMS notification failed',
@@ -78,162 +64,101 @@ const AdminPage = () => {
     } else {
       toast({
         title: 'Status Updated',
-        description: 'User has no phone number for SMS notification',
+        description: 'Status updated. User has no phone number for SMS notification',
       });
     }
   };
 
-  const filteredReports = reports.filter(report => {
-    if (filterType !== 'all' && report.type !== filterType) return false;
-    if (filterStatus !== 'all' && report.status !== filterStatus) return false;
-    return true;
-  });
+  // --- Filtered Reports by status AND type ---
+  const filteredReports = useMemo(() => {
+    let list = reports;
+    if (contentView !== 'all') list = list.filter((r) => r.status === contentView);
+    if (activeType !== 'all') list = list.filter((r) => r.type === activeType);
+    return list;
+  }, [reports, contentView, activeType]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+  // --- Status Counts ---
+  const statusCounts = useMemo(() => ({
+    all: reports.length,
+    'under-investigation': reports.filter((r) => r.status === 'under-investigation').length,
+    resolved: reports.filter((r) => r.status === 'resolved').length,
+    rejected: reports.filter((r) => r.status === 'rejected').length,
+  }), [reports]);
+
+  const mainStatuses: ReportStatus[] = ['under-investigation', 'resolved', 'rejected'];
 
   return (
-    <div>
-      <Navbar />
-      <div className="admin-container">
-        <div className="container">
-          <div className="admin-header">
-            <div>
-              <h1>Admin Dashboard</h1>
-              <p className="text-secondary">Manage all user reports</p>
-            </div>
-          </div>
+    <div className="admin-page-wrapper">
+      <div className="admin-content">
+        <header className="admin-content-header">
+          <h1 className="admin-dashboard-title">Admin Dashboard</h1>
 
-          <div className="admin-stats">
-            <div className="stat-card">
-              <div className="stat-icon">📊</div>
-              <div className="stat-content">
-                <div className="stat-value">{reports.length}</div>
-                <div className="stat-label">Total Reports</div>
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-icon">📝</div>
-              <div className="stat-content">
-                <div className="stat-value">
-                  {reports.filter(r => r.status === 'draft').length}
-                </div>
-                <div className="stat-label">New/Draft</div>
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-icon">🔍</div>
-              <div className="stat-content">
-                <div className="stat-value">
-                  {reports.filter(r => r.status === 'under-investigation').length}
-                </div>
-                <div className="stat-label">Under Investigation</div>
-              </div>
-            </div>
-            
-            <div className="stat-card">
-              <div className="stat-icon">✅</div>
-              <div className="stat-content">
-                <div className="stat-value">
-                  {reports.filter(r => r.status === 'resolved').length}
-                </div>
-                <div className="stat-label">Resolved</div>
-              </div>
-            </div>
+          {/* Create Buttons */}
+          <div className="create-buttons">
+            <Link to="/create/red-flag" className="btn btn-red-flag">+ Red Flag</Link>
+            <Link to="/create/intervention" className="btn btn-intervention">+ Intervention</Link>
           </div>
+        </header>
 
-          <div className="admin-filters">
-            <div className="filter-group">
-              <label htmlFor="typeFilter">Filter by Type:</label>
-              <select
-                id="typeFilter"
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as any)}
-              >
-                <option value="all">All Types</option>
-                <option value="red-flag">Red Flags</option>
-                <option value="intervention">Interventions</option>
-              </select>
-            </div>
+        {/* Type Filter Buttons */}
+        <div className="type-filter-buttons">
+          <button
+            className={`type-btn ${activeType === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveType('all')}
+          >
+            All Types
+          </button>
+          <button
+            className={`type-btn ${activeType === 'red-flag' ? 'active' : ''}`}
+            onClick={() => setActiveType('red-flag')}
+          >
+            Red Flags
+          </button>
+          <button
+            className={`type-btn ${activeType === 'intervention' ? 'active' : ''}`}
+            onClick={() => setActiveType('intervention')}
+          >
+            Interventions
+          </button>
+        </div>
 
-            <div className="filter-group">
-              <label htmlFor="statusFilter">Filter by Status:</label>
-              <select
-                id="statusFilter"
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="draft">Draft</option>
-                <option value="under-investigation">Under Investigation</option>
-                <option value="resolved">Resolved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
+        <h2 className="all-records-title">All Records</h2>
 
-          <div className="admin-table-container">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Type</th>
-                  <th>Title</th>
-                  <th>Location</th>
-                  <th>Created</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredReports.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
-                      No reports found
-                    </td>
-                  </tr>
-                ) : (
-                  filteredReports.map(report => (
-                    <tr key={report.id}>
-                      <td className="table-id">#{report.id}</td>
-                      <td>
-                        <span className={`badge badge-${report.type}`}>
-                          {report.type === 'red-flag' ? '🚩' : '⚠️'}
-                        </span>
-                      </td>
-                      <td className="table-title">{report.title}</td>
-                      <td className="table-location">{report.location}</td>
-                      <td className="table-date">{formatDate(report.createdAt)}</td>
-                      <td>
-                        <span className={`badge badge-${report.status}`}>
-                          {report.status.replace('-', ' ')}
-                        </span>
-                      </td>
-                      <td className="table-actions">
-                        <select
-                          value={report.status}
-                          onChange={(e) => handleStatusChange(report.id, e.target.value as ReportStatus)}
-                          className="status-select"
-                        >
-                          <option value="draft">Draft</option>
-                          <option value="under-investigation">Under Investigation</option>
-                          <option value="resolved">Resolved</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+        {/* Status Filter Buttons */}
+        <div className="status-filter-buttons">
+          <button
+            className={`status-btn all-status ${contentView === 'all' ? 'active' : ''}`}
+            onClick={() => setContentView('all')}
+          >
+            All Records ({reports.length})
+          </button>
+          {mainStatuses.map((status) => (
+            <button
+              key={status}
+              className={`status-btn status-${status} ${contentView === status ? 'active' : ''}`}
+              onClick={() => setContentView(status)}
+            >
+              {formatStatusForDisplay(status)} ({statusCounts[status as keyof typeof statusCounts]})
+            </button>
+          ))}
+        </div>
+
+        <h3 className="current-view-title">{formatStatusForDisplay(contentView)} View</h3>
+
+        {/* Reports Grid */}
+        <div className="reports-grid">
+          {filteredReports.length === 0 ? (
+            <p className="no-reports-message">No records found for this view.</p>
+          ) : (
+            filteredReports.map((report) => (
+              <ReportCard
+                key={report.id}
+                report={report}
+                highlight={activeType === 'all' || report.type === activeType}
+                {...({ onStatusChange: handleStatusChange } as any)}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>

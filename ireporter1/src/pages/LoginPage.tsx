@@ -1,9 +1,8 @@
+// LoginPage.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/ui/Navbar';
-
-
 import '../styles/AuthPage.css';
 
 const LoginPage = () => {
@@ -11,7 +10,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -21,8 +20,15 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      // Call login and get the returned user
+      const loggedInUser = await login(email, password);
+
+      // Redirect based on user type
+      if (loggedInUser.isAdmin) {
+        navigate('/admin'); // admin goes to admin page
+      } else {
+        navigate('/create-report'); // regular user goes to create report page
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

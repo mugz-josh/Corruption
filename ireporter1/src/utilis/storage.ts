@@ -9,18 +9,8 @@ const CURRENT_USER_KEY = 'ireporter_current_user';
 export const initializeStorage = () => {
   if (!localStorage.getItem(USERS_KEY)) {
     const demoUsers: User[] = [
-      {
-        id: '1',
-        email: 'admin@ireporter.com',
-        name: 'Joshua User',
-        isAdmin: true,
-      },
-      {
-        id: '2',
-        email: 'user@example.com',
-        name: 'Joshua Doe',
-        isAdmin: false,
-      },
+      { email: 'admin@ireporter.com', name: 'Joshua User', isAdmin: true },
+      { email: 'user@example.com', name: 'Joshua Doe', isAdmin: false },
     ];
     localStorage.setItem(USERS_KEY, JSON.stringify(demoUsers));
   }
@@ -29,7 +19,7 @@ export const initializeStorage = () => {
     const demoReports: Report[] = [
       {
         id: '1',
-        userId: '2',
+        userId: 'user@example.com', // ✅ use email consistently
         type: 'red-flag',
         title: 'Corruption in Public Procurement',
         description: 'Witnessed officials demanding bribes for contract awards at the city council.',
@@ -42,7 +32,7 @@ export const initializeStorage = () => {
       },
       {
         id: '2',
-        userId: '2',
+        userId: 'user@example.com', // ✅ use email
         type: 'intervention',
         title: 'Collapsed Bridge on Mombasa Road',
         description: 'The bridge has completely collapsed causing major traffic issues and safety concerns.',
@@ -59,56 +49,29 @@ export const initializeStorage = () => {
 };
 
 // User operations
-export const getUsers = (): User[] => {
-  const data = localStorage.getItem(USERS_KEY);
-  return data ? JSON.parse(data) : [];
-};
-
-export const addUser = (user: User): void => {
+export const getUsers = (): User[] => JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+export const addUser = (user: User) => {
   const users = getUsers();
   users.push(user);
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
-
-export const findUserByEmail = (email: string): User | undefined => {
-  const users = getUsers();
-  return users.find(u => u.email === email);
-};
-
-export const getCurrentUser = (): User | null => {
-  const data = localStorage.getItem(CURRENT_USER_KEY);
-  return data ? JSON.parse(data) : null;
-};
-
-export const setCurrentUser = (user: User | null): void => {
-  if (user) {
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-  } else {
-    localStorage.removeItem(CURRENT_USER_KEY);
-  }
+export const findUserByEmail = (email: string) => getUsers().find(u => u.email === email);
+export const getCurrentUser = (): User | null => JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+export const setCurrentUser = (user: User | null) => {
+  if (user) localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+  else localStorage.removeItem(CURRENT_USER_KEY);
 };
 
 // Report operations
-export const getReports = (): Report[] => {
-  const data = localStorage.getItem(REPORTS_KEY);
-  return data ? JSON.parse(data) : [];
-};
-
-export const getReportsByUser = (userId: string): Report[] => {
-  return getReports().filter(r => r.userId === userId);
-};
-
-export const getReportById = (id: string): Report | undefined => {
-  return getReports().find(r => r.id === id);
-};
-
-export const addReport = (report: Report): void => {
+export const getReports = (): Report[] => JSON.parse(localStorage.getItem(REPORTS_KEY) || '[]');
+export const getReportsByUser = (userId: string): Report[] => getReports().filter(r => r.userId === userId);
+export const getReportById = (id: string): Report | undefined => getReports().find(r => r.id === id);
+export const addReport = (report: Report) => {
   const reports = getReports();
   reports.push(report);
   localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
 };
-
-export const updateReport = (id: string, updates: Partial<Report>): void => {
+export const updateReport = (id: string, updates: Partial<Report>) => {
   const reports = getReports();
   const index = reports.findIndex(r => r.id === id);
   if (index !== -1) {
@@ -116,8 +79,7 @@ export const updateReport = (id: string, updates: Partial<Report>): void => {
     localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
   }
 };
-
-export const deleteReport = (id: string): void => {
+export const deleteReport = (id: string) => {
   const reports = getReports().filter(r => r.id !== id);
   localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
 };

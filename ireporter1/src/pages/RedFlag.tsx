@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Navbar from '../components/ui/Navbar';
 import '../styles/Dashboard.css';
 
-const Dashboard = () => {
+const RedFlag = () => {
   const [activeTab, setActiveTab] = useState<'redflag' | 'intervention'>('redflag');
 
   return (
@@ -69,4 +69,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default RedFlag;
