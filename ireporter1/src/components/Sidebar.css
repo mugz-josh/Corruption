@@ -1,0 +1,200 @@
+/* Sidebar.css */
+
+.sidebar {
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 30px 20px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
+
+.sidebar:hover {
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar h2 {
+  color: white;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  letter-spacing: 1px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-size: 1rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: linear-gradient(to bottom, #ffd89b, #19547b);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  transform: translateX(8px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  font-weight: 600;
+}
+
+.nav-link.active::before {
+  transform: scaleY(1);
+  background: linear-gradient(to bottom, #ffd89b, #19547b);
+}
+
+/* Special styling for admin panel link */
+.nav-link[href="/admin"] {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.nav-link[href="/admin"]:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+}
+
+.nav-link[href="/admin"]::before {
+  background: linear-gradient(to bottom, #ffd700, #ffa500);
+}
+
+/* Special styling for logout link */
+.nav-link[href="/login"] {
+  margin-top: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-link[href="/login"]:hover {
+  background: rgba(255, 59, 59, 0.2);
+  color: white;
+  border-color: rgba(255, 59, 59, 0.4);
+}
+
+.nav-link[href="/login"]::before {
+  background: linear-gradient(to bottom, #ff6b6b, #ee5a52);
+}
+
+/* Add icons using pseudo-elements */
+.nav-link::after {
+  content: '→';
+  position: absolute;
+  right: 20px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 250px;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+}
+
+/* Animation for page load */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.sidebar {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Add some depth with multiple shadows */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -10px;
+  width: 10px;
+  height: 100%;
+  background: linear-gradient(to right, 
+    rgba(0, 0, 0, 0.03) 0%, 
+    rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+}

@@ -1,75 +1,47 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Navigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/ui/Navbar';
-import { getReportById } from '../utilis/storage';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import type { Report } from '../types';
-import '../styles/SingleReportPage.css';
 
-const SingleReportPage = () => {
-  const { user } = useAuth();
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+import Sidebar from '../components/Sidebar';
+import { getAllReports } from '../utils/storage';
+import './SingleReportPage.css';
+
+const SingleReportPage: React.FC = () => {
+  const { id } = useParams();
   const [report, setReport] = useState<Report | null>(null);
 
   useEffect(() => {
-    if (id) {
-      const foundReport = getReportById(id);
-      if (foundReport) setReport(foundReport);
-    }
+    const reports = getAllReports();
+    const found = reports.find((r) => r.id === id);
+    if (found) setReport(found);
   }, [id]);
 
-  if (!user) return <Navigate to="/login" />;
-
-  if (!report)
-    return (
-      <div>
-        <Navbar />
-        <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <h2>Report not found</h2>
-          <Link to="/dashboard" className="btn btn-primary">
-            Back to Dashboard
-          </Link>
-        </div>
-      </div>
-    );
-
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-  const isOwner = report.userId === user.email; // ✅ match email
+  if (!report) return <p>Report not found.</p>;
 
   return (
-    <div>
-      <Navbar />
-      <div className="single-report-container">
-        <button onClick={() => navigate(-1)} className="back-button">
-          ← Back
-        </button>
-
-        <div className="report-detail-card">
-          <div className="report-detail-header">
-            <div className="report-badges">
-              <span className={`badge badge-${report.type}`}>
-                {report.type === 'red-flag' ? '🚩 Red Flag' : '⚠️ Intervention'}
-              </span>
-              <span className={`badge badge-${report.status}`}>{report.status.replace('-', ' ')}</span>
+    <div style={{ display: 'flex' }}>
+      <Sidebar />
+      <div style={{ marginLeft: '200px', padding: '2rem', width: '100%' }}>
+        <div className="single-report-container">
+          <h2>{report.title}</h2>
+          <p><strong>Type:</strong> {report.type}</p>
+          <p><strong>Status:</strong> {report.status}</p>
+          <p><strong>Description:</strong> {report.description}</p>
+          <p><strong>Location:</strong> {report.latitude}, {report.longitude}</p>
+          {report.media && report.media.length > 0 && (
+            <div>
+              <h4>Media:</h4>
+              {report.media.map((url, index) => (
+                <div key={index}>
+                  {url.endsWith('.mp4') ? (
+                    <video src={url} controls width="300" />
+                  ) : (
+                    <img src={url} alt="report media" width="300" />
+                  )}
+                </div>
+              ))}
             </div>
-            {isOwner && (
-              <Link to={`/edit-report/${report.id}`} className="btn btn-outline btn-sm">
-                Edit Report
-              </Link>
-            )}
-          </div>
-
-          <h1>{report.title}</h1>
-          <p>{report.description}</p>
-          <p>
-            📍 {report.location} ({report.latitude}, {report.longitude})
-          </p>
-          <p>Status: {report.status}</p>
-          <p>Created: {formatDate(report.createdAt)}</p>
-          <p>Updated: {formatDate(report.updatedAt)}</p>
+          )}
         </div>
       </div>
     </div>

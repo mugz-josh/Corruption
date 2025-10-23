@@ -1,191 +1,123 @@
-import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/ui/Navbar';
-import type { Report, ReportType } from '../types';
-import { addReport } from '../utilis/storage';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import type { Report } from '../types';
+import MapPicker from '../components/MapPicker';
+import Sidebar from '../components/Sidebar';
+import { saveReport, getLoggedInUserId } from '../utils/storage';
+import './CreateReportPage.css'; // Make sure this path is correct
 
-// use storage function
-import '../styles/CreateReportPage.css';
-
-const CreateReportPage = () => {
-  const { user } = useAuth();
+const CreateReportPage: React.FC = () => {
   const navigate = useNavigate();
+  const userId = getLoggedInUserId();
 
-  const [type, setType] = useState<ReportType>('red-flag');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-  const [video, setVideo] = useState<File | null>(null);
+  // ✅ Make sure "type" is properly typed
+  const [form, setForm] = useState<{
+    title: string;
+    description: string;
+    type: 'red-flag' | 'intervention';
+    latitude: string;
+    longitude: string;
+  }>({
+    title: '',
+    description: '',
+    type: 'red-flag',
+    latitude: '0',
+    longitude: '0',
+  });
 
-  if (!user) return <Navigate to="/login" />;
+  const [media, setMedia] = useState<string[]>([]);
 
-  const handleGetLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude.toString());
-          setLongitude(position.coords.longitude.toString());
-        },
-        (err) => setError('Unable to get location: ' + err.message)
-      );
-    } else {
-      setError('Geolocation is not supported by your browser');
+  // ✅ Handle form field changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value as 'red-flag' | 'intervention' });
+  };
+
+  // ✅ Handle file uploads
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const urls = Array.from(files).map((file) => URL.createObjectURL(file));
+      setMedia(urls);
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (type === 'image' && file.type.startsWith('image/')) setImage(file);
-    else if (type === 'video' && file.type.startsWith('video/')) setVideo(file);
-    else setError(`Please select a valid ${type} file`);
+  // ✅ Handle map location update
+  const handleLocationChange = (lat: number, lng: number) => {
+    setForm({ ...form, latitude: lat.toString(), longitude: lng.toString() });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    if (!title.trim() || !description.trim()) {
-      setError('Title and description are required');
-      setLoading(false);
+  // ✅ Handle form submit
+  const handleSubmit = () => {
+    if (!userId) {
+      alert('You must be logged in to submit a report.');
+      navigate('/login');
       return;
     }
 
+    // Create the report object matching your Report type
     const newReport: Report = {
       id: Date.now().toString(),
-      userId: user.email, // ✅ Use email as userId
-      type,
-      title: title.trim(),
-      description: description.trim(),
-      location: location.trim(),
-      latitude: latitude ? parseFloat(latitude) : undefined,
-      longitude: longitude ? parseFloat(longitude) : undefined,
+      title: form.title,
+      description: form.description,
+      type: form.type,
+      latitude: form.latitude,
+      longitude: form.longitude,
       status: 'draft',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      images: image ? [URL.createObjectURL(image)] : undefined,
-      videos: video ? [URL.createObjectURL(video)] : undefined,
+      createdBy: userId,
+      media,
     };
 
-    try {
-      addReport(newReport); // save using storage.ts
-      alert('Report created successfully!');
-      navigate('/records'); // navigate to RecordsListPage
-    } catch (err) {
-      console.error(err);
-      setError('Failed to create report. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    saveReport(newReport);
+    alert('Report created successfully!');
+    navigate('/dashboard');
   };
 
   return (
-    <div className="create-page">
-      <Navbar />
-      <div className="create-container">
-        <h1>Create Record</h1>
-        <div className="type-buttons">
-          <button
-            type="button"
-            className={`type-btn ${type === 'red-flag' ? 'active' : ''}`}
-            onClick={() => setType('red-flag')}
-          >
-            🚩 Red Flag
-          </button>
-          <button
-            type="button"
-            className={`type-btn ${type === 'intervention' ? 'active' : ''}`}
-            onClick={() => setType('intervention')}
-          >
-            🛠️ Intervention
-          </button>
-        </div>
+    <div style={{ display: 'flex' }}>
+      <Sidebar />
+      <div style={{ marginLeft: '200px', padding: '2rem', width: '100%' }}>
+        <div className="create-report-container">
+          <h2>Create Report</h2>
 
-        {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="create-form">
           <input
-            type="text"
-            placeholder="Title *"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
+            name="title"
+            placeholder="Title"
+            value={form.title}
+            onChange={handleChange}
           />
 
           <textarea
-            placeholder="Description *"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            rows={5}
+            name="description"
+            placeholder="Description"
+            value={form.description}
+            onChange={handleChange}
           />
 
+          <select name="type" value={form.type} onChange={handleChange}>
+            <option value="red-flag">Red Flag</option>
+            <option value="intervention">Intervention</option>
+          </select>
+
+          <h4>Pick Location</h4>
+          <MapPicker
+            lat={parseFloat(form.latitude)}
+            lng={parseFloat(form.longitude)}
+            onLocationChange={handleLocationChange}
+          />
+
+          <h4>Upload Media</h4>
           <input
-            type="text"
-            placeholder="Location/Address"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            type="file"
+            multiple
+            accept="image/*,video/*"
+            onChange={handleFileChange}
           />
 
-          <div className="coord-row">
-            <input
-              type="text"
-              placeholder="Latitude"
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Longitude"
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-            />
-          </div>
-
-          <button type="button" onClick={handleGetLocation} className="btn btn-outline btn-sm">
-            📍 Use My Current Location
-          </button>
-
-          <div className="upload-row">
-            <div className="upload-box">
-              <label htmlFor="image-upload">
-                <span>📷 {image ? 'Image Selected' : 'Add Image'}</span>
-                <p>{image ? image.name : 'Click to upload image'}</p>
-              </label>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileUpload(e, 'image')}
-                style={{ display: 'none' }}
-              />
-            </div>
-            <div className="upload-box">
-              <label htmlFor="video-upload">
-                <span>🎥 {video ? 'Video Selected' : 'Add Video'}</span>
-                <p>{video ? video.name : 'Click to upload video'}</p>
-              </label>
-              <input
-                id="video-upload"
-                type="file"
-                accept="video/*"
-                onChange={(e) => handleFileUpload(e, 'video')}
-                style={{ display: 'none' }}
-              />
-            </div>
-          </div>
-
-          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
-            {loading ? 'Creating...' : 'CREATE RECORD'}
-          </button>
-        </form>
+          <button onClick={handleSubmit}>Submit Report</button>
+        </div>
       </div>
     </div>
   );

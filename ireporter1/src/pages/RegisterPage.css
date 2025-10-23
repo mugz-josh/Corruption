@@ -1,0 +1,388 @@
+/* RegisterPage.css */
+
+.register-container {
+  max-width: 450px;
+  margin: 80px auto;
+  padding: 3rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e8ecef;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.register-container h2 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.register-container h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+/* Input field styling */
+.register-container input {
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #e8ecef;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  background: white;
+  box-sizing: border-box;
+}
+
+.register-container input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  transform: translateY(-2px);
+}
+
+.register-container input:hover {
+  border-color: #a5b4fc;
+}
+
+.register-container input::placeholder {
+  color: #a0aec0;
+  font-weight: 400;
+}
+
+/* Password input specific styling */
+.register-container input[type="password"] {
+  letter-spacing: 1px;
+}
+
+/* Submit button styling */
+.register-container button {
+  width: 100%;
+  padding: 1.2rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.register-container button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.register-container button:hover::before {
+  left: 100%;
+}
+
+.register-container button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.register-container button:active {
+  transform: translateY(-1px);
+}
+
+.register-container button:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Form group styling */
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Error message styling */
+.error-message {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #fed7d7;
+  border-radius: 8px;
+  border-left: 4px solid #f56565;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Success message */
+.success-message {
+  color: #38a169;
+  font-size: 0.875rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f0fff4;
+  border-radius: 8px;
+  border-left: 4px solid #48bb78;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Password strength indicator */
+.password-strength {
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.password-weak {
+  background: #fed7d7;
+  color: #c53030;
+  border-left: 4px solid #f56565;
+}
+
+.password-medium {
+  background: #fefcbf;
+  color: #d69e2e;
+  border-left: 4px solid #ecc94b;
+}
+
+.password-strong {
+  background: #c6f6d5;
+  color: #276749;
+  border-left: 4px solid #48bb78;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Additional links */
+.register-links {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8ecef;
+}
+
+.register-links a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.register-links a:hover {
+  color: #5a6fd8;
+  text-decoration: underline;
+}
+
+.register-links p {
+  color: #6c757d;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+/* Animation for form elements */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-container > * {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.register-container h2 {
+  animation-duration: 0.8s;
+}
+
+.register-container input {
+  animation-duration: 1s;
+}
+
+.register-container input:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.register-container input:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.register-container input:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.register-container button {
+  animation-duration: 1.2s;
+  animation-delay: 0.4s;
+  animation-fill-mode: both;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .register-container {
+    margin: 50px 1rem;
+    padding: 2rem;
+    border-radius: 16px;
+  }
+  
+  .register-container h2 {
+    font-size: 2rem;
+  }
+  
+  .register-container input {
+    padding: 1rem 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    margin: 30px 0.5rem;
+    padding: 1.5rem;
+  }
+  
+  .register-container h2 {
+    font-size: 1.75rem;
+  }
+  
+  .register-container button {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Focus states for accessibility */
+.register-container input:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.register-container button:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Password visibility toggle */
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+  color: #667eea;
+}
+
+.password-input-container {
+  position: relative;
+}
+
+.password-input-container input {
+  padding-right: 3rem;
+}
+
+/* Terms and conditions */
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.terms input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.terms a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.terms a:hover {
+  text-decoration: underline;
+}
